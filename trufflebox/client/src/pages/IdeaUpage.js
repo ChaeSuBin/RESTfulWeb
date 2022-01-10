@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { postCreateIdea } from "../api.js";
 import { getAccount } from '../components/getAddrCpnt';
 
-export function UploadIead(){
+export const UploadIead = ({contract, accounts}) => {
   
   async function handleFormSubmitUp(record) {
     await postCreateIdea(record);
@@ -10,26 +10,21 @@ export function UploadIead(){
   }
   return(
     <>
-      <p>DEMO : REGI</p>
+      <p>PROTO : REGI</p>
       <div className="box">
       <p>idea upload</p>
-      <IdeaForm onSubmit={handleFormSubmitUp} />
+      <IdeaForm onSubmit={handleFormSubmitUp} useraddr={accounts} />
       </div>
     </>
   )
 }
 
-function IdeaForm({onSubmit}) {
+function IdeaForm({onSubmit, useraddr}) {
   const [address, setAddr] = useState('');
 
   useEffect(async()=>{
-    if (typeof window.ethereum !== 'undefined') {
-      console.log('MetaMask is installed!');
-      const account = await getAccount();
-      setAddr(account);
-      console.log(address);
-    }
-  });
+    setAddr(useraddr[0]);
+  },[]);
   
   async function handleFormSubmit(event) {
     event.preventDefault();

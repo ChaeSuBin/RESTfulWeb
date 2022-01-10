@@ -15,6 +15,29 @@ app.listen(port, () => {
 app.get("/", function (req, res) {
     res.send("wow");
 });
+app.get("/teamplayers/:teamid", async(req, res) => {
+  let addr = [];
+  const counter = await TeamPlayers.count({
+    where: {teamId : req.params.teamid},
+  });
+  const findUsers = await TeamPlayers.findAll({
+      where: {teamId : req.params.teamid},
+  });
+  await Teams.findByPk(findUsers[0].teamId).then(hash => {
+    //console.log('o ', getOrigin.origin);
+    addr.push(hash.origin);
+  });
+  let iter = 0;
+  while(iter != counter){
+    await Players.findByPk(findUsers[iter].playerId).then(user => {
+      //console.log('tm ', user.sub);
+      addr.push(user.sub);
+    });
+    console.log('u: ', findUsers[iter].playerId);
+    ++iter;
+  }
+  res.json(addr);
+});
 app.get("/teamscount", async(req, res) => {
   const rows = await Teams.findOne({
     attributes: [

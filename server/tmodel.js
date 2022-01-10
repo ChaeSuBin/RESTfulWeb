@@ -50,13 +50,39 @@ import { sequelize, Players, Teams, TeamPlayers } from "./models.js";
 //   include: Teams,
 // });
 // console.log(result);
-//-----------------------------------3
+//----------------------------------3
 
-const team = await Teams.findOne({
-    where: { origin: '0xtesthash' },
-});
-console.log('v: ', team);
-if(team == null){
-    console.log('yes');
+// const team = await Teams.findOne({
+//     where: { origin: '0xtesthash' },
+// });
+// console.log('v: ', team);
+// if(team == null){
+//     console.log('yes');
+// }
+//----------------------------------4
+let addr = [];
+
+const counter = await TeamPlayers.count({
+    where: {teamId : 1},
+})
+console.log('v: ', counter);
+
+const findUsers = await TeamPlayers.findAll({
+    where: {teamId : 1},
+})
+await Teams.findByPk(findUsers[0].teamId).then(hash => {
+    //console.log('o ', getOrigin.origin);
+    addr.push(hash.origin);
+})
+
+let iter = 0;
+while(iter != counter){
+    await Players.findByPk(iter + 1).then(user => {
+        //console.log('tm ', user.sub);
+        addr.push(user.sub);
+    });
+    console.log('u: ', findUsers[iter].playerId);
+    ++iter;
 }
-//res.json(rows);
+console.log('r ', addr);
+//res.json(counter.rows);
