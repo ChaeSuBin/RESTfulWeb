@@ -1,6 +1,6 @@
-import { sequelize, Players, Teams, TeamPlayers } from "./models.js";
+import { sequelize, Players, Teams, TeamPlayers, Holds } from "./models.js";
 
-//await sequelize.sync({ force: true }); //all table initilizing
+await sequelize.sync({ force: true }); //all table initilizing
 
 // (async()=>{
 //     await Players.sync({ force: true});
@@ -18,10 +18,19 @@ import { sequelize, Players, Teams, TeamPlayers } from "./models.js";
 // await Teams.sync({ force: true });
 
 //----------------------------------------2
-// const dumy = {
+// const dumyTeam = {
 //   hash : 'testhash',
 //   title : 'testtitle',
 //   description : 'dumydesc',
+//   origin: 'dumyorigin',
+//   ideaToken: 1,
+// }
+// const dumyHold = {
+//   hash : 'testhash',
+//   title : 'testtitle',
+//   description : 'dumydesc',
+//   origin: 'dumyorigin',
+//   reqstake: 50,
 //   userId : 1,
 // }
 // const dumyPlayer = {
@@ -32,57 +41,79 @@ import { sequelize, Players, Teams, TeamPlayers } from "./models.js";
 
 // const amidala = await Players.create(dumyPlayer);
 // const [team, created] = await Teams.findOrCreate({
-//     where: { hash: 'testhash0x' },
-//     defaults: {
-//         title : 'testtitle',
-//         description : 'dumydesc',
-//         origin: 'testhash0x',
-//         userId : 1,
-//     },
+//     where: { hash: 'testhash' },
+//     defaults: dumyTeam,
 // });
 // if (created) {
-//     console.log('!---------crted');
+//     console.log('o---------crted');
 // }
 
-// await amidala.addTeams(team, { through: { selfGranted: false } });
-// const result = await Players.findOne({
-//   where: { sub: '0xp4dm3' },
-//   include: Teams,
+// await Players.count().then(rows => {
+//   console.log('v: ', rows);
+// })
+
+//await amidala.addTeams(team, { through: { status: 100 }});
+// const result = await TeamPlayers.findAll({
+//   where: { teamId: 2 },
+//   //include: Teams,
 // });
-// console.log(result);
+
+// let iter = 0;
+// let ideaPoint = 0;
+// while(result.length != iter){
+//     ideaPoint += result[iter].status;
+//     ++iter;
+// }
+// console.log(ideaPoint);
 //----------------------------------3
-
-// const team = await Teams.findOne({
-//     where: { origin: '0xtesthash' },
-// });
-// console.log('v: ', team);
-// if(team == null){
-//     console.log('yes');
+// let items = [];
+const hold = await TeamPlayers.findOne({
+    where: { teamId: 1 },
+});
+console.log('v ', hold.playerId);
+// if(hold == null){
+//     console.log('not found..');
 // }
+// else{
+//     console.log('v: ', hold);
+// }
+
+// const tid = await TeamPlayers.findAll({
+//   where: { playerId: 3}
+// });
+
+// for(let iter = 0; iter < tid.length; ++iter){
+//   items.push(tid[iter].teamId);
+// }
+// console.log('t: ', items);
 //----------------------------------4
-let addr = [];
+// let addr = [];
 
-const counter = await TeamPlayers.count({
-    where: {teamId : 1},
-})
-console.log('v: ', counter);
+// const counter = await TeamPlayers.count({
+//     where: {teamId : 1},
+// })
+// console.log('v: ', counter);
 
-const findUsers = await TeamPlayers.findAll({
-    where: {teamId : 1},
-})
-await Teams.findByPk(findUsers[0].teamId).then(hash => {
-    //console.log('o ', getOrigin.origin);
-    addr.push(hash.origin);
-})
+// const findUsers = await TeamPlayers.findAll({
+//     where: {teamId : 1},
+// })
+// await Teams.findByPk(findUsers[0].teamId).then(hash => {
+//     //console.log('o ', getOrigin.origin);
+//     addr.push(hash.origin);
+// })
 
-let iter = 0;
-while(iter != counter){
-    await Players.findByPk(iter + 1).then(user => {
-        //console.log('tm ', user.sub);
-        addr.push(user.sub);
-    });
-    console.log('u: ', findUsers[iter].playerId);
-    ++iter;
-}
-console.log('r ', addr);
+// let iter = 0;
+// while(iter != counter){
+//     await Players.findByPk(iter + 1).then(user => {
+//         //console.log('tm ', user.sub);
+//         addr.push(user.sub);
+//     });
+//     console.log('u: ', findUsers[iter].playerId);
+//     ++iter;
+// }
+// console.log('r ', addr);
+// ---------------------------------5
+// Holds.destroy({
+//     where: {id: 1}
+// })
 //res.json(counter.rows);

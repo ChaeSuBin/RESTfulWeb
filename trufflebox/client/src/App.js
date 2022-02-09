@@ -10,6 +10,7 @@ import {
 import ViewItems from "./pages/ideaView";
 import { Home } from "./pages/rootPage"
 import { AdminOpt } from "./pages/adminPage";
+import { UserOpt } from "./pages/myPage";
 import { UploadIead } from "./pages/IdeaUpage";
 import { JoinIead } from "./pages/IdeaJoin";
 import "./App.css";
@@ -80,6 +81,8 @@ class App extends Component {
                   <Route exact path='/joinup' element={<JoinIead 
                     accounts={this.state.accounts} contract={this.state.contract}/>}/>
                   <Route exact path='/admin' element={<AdminOpt 
+                    accounts={this.state.accounts} contract={this.state.contract}/>}/>
+                  <Route exact path='/myinfo' element={<UserOpt
                     accounts={this.state.accounts} contract={this.state.contract}/>}/>
                 </Routes>
               </div>

@@ -1,10 +1,9 @@
 import React from 'react';
 import { getIdeaPlayers, getPlayers, getIdeaPoints } from "../api.js";
-import { Link } from "react-router-dom";
 import './modal.css';
 
 // 子コンポーネント（モーダル）
-class Modal extends React.Component {
+class ExitCall extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -41,7 +40,6 @@ class Modal extends React.Component {
           this.setState({points: copyPoint});
           tempScore += data[iter];
         }
-        console.log(this.state.points);
         this.setState({score: tempScore});
       });
       await getIdeaPlayers(ideaid).then((data) => {
@@ -80,16 +78,9 @@ class Modal extends React.Component {
                   </li>
                 ))}
               </ul>
+              <button onClick={this.props.onClick}>Block</button>
               <button onClick={this.props.onClick}>Close</button>
               <button onClick={this.props.onClick}>Download</button>
-              <Link to={{
-                pathname: '/joinup',
-                search: `title=${this.props.content.title}`,
-                hash: `origin=${this.props.content.origin}`,
-                state: {key: 'valuee'}
-              }}>
-                <button onClick={this.joinIdea}>Join</button>
-              </Link>
             </div>
           </div>
         </div>
@@ -101,4 +92,4 @@ class Modal extends React.Component {
   }
 }
 
-export default Modal;
+export default ExitCall;

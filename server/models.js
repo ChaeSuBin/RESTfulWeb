@@ -51,12 +51,50 @@ export const Teams = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    blocked: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    }
   },
   { underscored: true },
 );
 
-export const TeamPlayers = sequelize.define('team_play',
- {}, { timestamps: false }
+export const TeamPlayers = sequelize.define(
+  'team_play',
+  {
+    status: DataTypes.INTEGER
+  },
+  { timestamps: false }
+);
+
+export const Holds = sequelize.define("holds",
+  {
+    hash: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    origin: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    reqstake: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    }
+  },
+  { underscored: true },
 );
 
 Players.belongsToMany(Teams, { through: TeamPlayers });

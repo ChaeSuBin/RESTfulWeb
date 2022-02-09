@@ -4,7 +4,7 @@ import '../client/node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20
 
 contract SeverStore is ERC20{
 
-    constructor() ERC20("Gold", "GLD") {
+    constructor() ERC20("Thread", "THRe") {
         _mint(msg.sender, 10*10**18);
     }
     struct playTeam {
@@ -29,11 +29,11 @@ contract SeverStore is ERC20{
             ++countMint;
         }
     }
-    function getname(uint _origin) public view returns(address){
-        return history[_origin].name[0];
+    function getname(uint _teamId) public view returns(address[] memory){
+        return history[_teamId].name;
     }
-    function gethash(uint _origin) public view returns(string memory){
-        return history[_origin].hash;
+    function gethash(uint _teamId) public view returns(string memory){
+        return history[_teamId].hash;
     }
     function connection() public view returns(string memory){
         return connecTecs;

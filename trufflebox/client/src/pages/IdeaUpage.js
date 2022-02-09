@@ -50,7 +50,7 @@ function IdeaForm({onSubmit, useraddr}) {
       <div className="field">
         <div className="control">
         addr:
-        <input name="addr" className="input" placeholder='address' size='43'
+        <input name="addr" className="input" placeholder='address' size='45'
           value={address} disabled="disabled"/>
         <p>your name: 
         <input name="name" className="input" placeholder='name' /></p>

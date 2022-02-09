@@ -55,13 +55,13 @@ class ViewItems extends React.Component {
           <img src={logo} className="App-logo" alt="logo" />
           <p>문서 {this.state.item}건이 검색됨</p>
           {this.state.itemList.map(searchItems => (
-          <ListItems
-            key={searchItems.title}
-            title = {searchItems.title}
-            description = {searchItems.description}
-            onClick={() => this.handleClick(searchItems)}
-          />
-        ))}
+            <ListItems
+              key={searchItems.title}
+              title = {searchItems.title}
+              description = {searchItems.description}
+              onClick={() => this.handleClick(searchItems)}
+            />
+          ))}
           <Modal
             account={'this.state.accounts'} contract={'this.state.contract'}
             showFlag={this.state.showModal} content = {this.state.cont}
