@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-//import SimpleStorageContract from "./contracts/SimpleStorage.json";
-import SimpleStorageContract from "./contracts/SeverStore.json";
+import SimpleStorageContract from "./contracts/CoinDispencer.json";
+//import SimpleStorageContract from "./contracts/SeverStore.json";
 import getWeb3 from "./getWeb3";
 import {
   BrowserRouter as Router,
@@ -9,10 +9,12 @@ import {
 } from "react-router-dom";
 import ViewItems from "./pages/ideaView";
 import { Home } from "./pages/rootPage"
+import { Nav } from "./components/naviCpnt";
 import { AdminOpt } from "./pages/adminPage";
 import { UserOpt } from "./pages/myPage";
 import { UploadIead } from "./pages/IdeaUpage";
 import { JoinIead } from "./pages/IdeaJoin";
+import { Nftwave } from "./pages/nftUpage";
 import "./App.css";
 
 class App extends Component {
@@ -65,18 +67,20 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <h2>Smart Contract Connected</h2>
+        {/* <h2>Smart Contract Connected</h2>
         <p>Truffle Box is ready.</p>
-        <div>The stored value is: <b>{this.state.storageValue}</b></div>
+        <div>The stored value is: <b>{this.state.storageValue}</b></div> */}
         <header>
           <Router>
+            <Nav></Nav>
             <section className="">
               <div className="container">
                 <Routes>
                   <Route exact path='/' element={<Home 
                     accounts={this.state.accounts} contract={this.state.contract}/> }/>
-                  <Route exact path='/search' element={<ViewItems />}/>
-                  <Route exact path='/create' element={<UploadIead 
+                  <Route exact path='/search' element={<ViewItems 
+                    accounts={this.state.accounts} contract={this.state.contract}/>}/>
+                  <Route exact path='/create/:mode' element={<UploadIead 
                     accounts={this.state.accounts} contract={this.state.contract}/>}/>
                   <Route exact path='/joinup' element={<JoinIead 
                     accounts={this.state.accounts} contract={this.state.contract}/>}/>
@@ -84,6 +88,8 @@ class App extends Component {
                     accounts={this.state.accounts} contract={this.state.contract}/>}/>
                   <Route exact path='/myinfo' element={<UserOpt
                     accounts={this.state.accounts} contract={this.state.contract}/>}/>
+                  <Route exact path='/ntwave' element={<Nftwave
+                    accounts={this.state.accounts} web3={this.state.web3}/>}/>
                 </Routes>
               </div>
             </section>

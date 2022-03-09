@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { postHoldIdea } from "../api.js";
+import { postHoldIdea, getPlayersId } from "../api.js";
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { registChecker } from "../components/registCatch.js";
@@ -33,6 +33,7 @@ function IdeaForm({onSubmit, docuName, docuOri, useraddr}) {
   const [address, setAddr] = useState('');
   const [playerid , setId] = useState();
   const name = docuName;
+  let tokenCheck = false;
   //console.log('v: ', docuOri);
   
   useEffect(()=>{
@@ -47,52 +48,38 @@ function IdeaForm({onSubmit, docuName, docuOri, useraddr}) {
   }
   
   async function handleFormSubmit(evt) {
-      evt.preventDefault();
-      if (onSubmit) {
-          const record = {
-            hash: evt.target.elements.docuhash.value,
-            name: evt.target.elements.docuname.value,
-            desc: evt.target.elements.docudesc.value,
-            username: evt.target.elements.name.value,
-            useraddr: evt.target.elements.addr.value,
-            putstake: evt.target.elements.stake.value,
-            origin: docuOri,
-            userid: playerid,
-          };
-          evt.target.elements.docuhash.value ='';
-          evt.target.elements.docuname.value ='';
-          evt.target.elements.docudesc.value ='';
-          evt.target.elements.addr.value ='';
-          evt.target.elements.name.value ='';
-          onSubmit(record);
-        }
-      }
+    evt.preventDefault();
+    const record = {
+      name: evt.target.elements.docuname.value,
+      desc: evt.target.elements.docudesc.value,
+      useraddr: evt.target.elements.addr.value,
+      putstake: evt.target.elements.stake.value,
+      userid: playerid,
+    };
+    onSubmit(record);
+    //console.log(record);
+  }
 
-    return(
+  return(
     <form onSubmit={handleFormSubmit}>
       <div className="field">
         <div className="control">
-        addr:
-        <input name="addr" className="input" placeholder='address' size='45'
-          value={address} disabled="disabled"/>
-        <p>your name: 
-        <input name="name" className="input" placeholder='name' /></p>
-        <label className="label">docu hash</label>
+          addr:
+          <input name="addr" className="input" placeholder='address' size='45'
+            value={address} disabled="disabled"
+          />
           <div className="control">
-            <input name="docuhash" className="input" />
-          </div>
-          <label className="label">docu name</label>
-          <div className="control">
+            title: 
             <input name="docuname" className="input"
               value={name} disabled="disabled" />
           </div>
           <label className="label">description</label>
           <div className="control">
-            <textarea name="docudesc" rows='20' cols='70' className="input" />
+            <textarea name="docudesc" rows='20' cols='60' className="input" />
           </div>
           <label className="label">require stake</label>
           <div className="control">
-            <input name="stake" className="input" placeholder="0-100"/>
+            <input name="stake" className="input" placeholder="integer"/>
           </div>
         </div>
       </div>

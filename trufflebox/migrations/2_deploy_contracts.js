@@ -1,6 +1,7 @@
-//var SimpleStorage = artifacts.require("./SimpleStorage.sol");
-var SeverStore = artifacts.require("./SeverStore.sol");
+var CoinDispencer = artifacts.require("./CoinDispencer.sol");
+var ThreItems = artifacts.require("./ThreItems.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(SeverStore);
+  deployer.deploy(CoinDispencer);
+  deployer.deploy(ThreItems);
 };

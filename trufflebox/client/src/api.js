@@ -37,6 +37,30 @@ export async function getPlayersId(_playerAddr) {
 export async function getTeamPlayers(_teamId) {
     return request(`/teamplayers/${_teamId}`);
 }
+export async function putUpdateBlock(record) {
+    console.log('v', JSON.stringify(record));
+    return request(`/blockset`, {
+      body: JSON.stringify(record),
+      headers: {"Content-Type": "application/json"},
+      method: "PUT",
+    });
+}
+export async function putExitBlock(record) {
+    console.log('v', JSON.stringify(record));
+    return request(`/blockexit`, {
+      body: JSON.stringify(record),
+      headers: {"Content-Type": "application/json"},
+      method: "PUT",
+    });
+}
+export async function putUpdateTokn(record) {
+    console.log('v', JSON.stringify(record));
+    return request(`/tokenudt`, {
+      body: JSON.stringify(record),
+      headers: {"Content-Type": "application/json"},
+      method: "PUT",
+    });
+}
 export async function putUpdateIdea(record) {
     console.log('v', JSON.stringify(record));
     return request(`/joinidea`, {
@@ -45,6 +69,30 @@ export async function putUpdateIdea(record) {
       method: "PUT",
     });
 }
+export async function putFundIdea(record) {
+    console.log('v', JSON.stringify(record));
+    return request(`/fundidea`, {
+      body: JSON.stringify(record),
+      headers: {"Content-Type": "application/json"},
+      method: "PUT",
+    });
+}
+// export async function postFileIdx(stream) {
+//     console.log('v', JSON.stringify(stream));
+//     return request(`/uploadfile`, {
+//       body: JSON.stringify(stream),
+//       headers: {"Content-Type": "application/json"},
+//       method: "POST",
+//     });
+// }
+// export async function postFileDoc(docu) {
+//     console.log('v', JSON.stringify(docu));
+//     return request(`/uploadocu`, {
+//       body: JSON.stringify(docu),
+//       headers: {"Content-Type": "application/json"},
+//       method: "POST",
+//     });
+// }
 export async function postHoldIdea(record) {
     console.log('v', JSON.stringify(record));
     return request(`/requirejoin`, {
@@ -72,6 +120,13 @@ export async function postUserRegi(record) {
 export async function dltHold(_holdId) {
     console.log('v', _holdId);
     return request(`/dlthold/${_holdId}`, {
+      headers: {"Content-Type": "application/json"},
+      method: "DELETE",
+    });
+}
+export async function dltTeam(_holdId) {
+    console.log('v', _holdId);
+    return request(`/dltteam/${_holdId}`, {
       headers: {"Content-Type": "application/json"},
       method: "DELETE",
     });

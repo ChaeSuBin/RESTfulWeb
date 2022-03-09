@@ -5,38 +5,65 @@ import '../client/node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20
 contract SeverStore is ERC20{
 
     constructor() ERC20("Thread", "THRe") {
-        _mint(msg.sender, 10*10**18);
+        //_mint(msg.sender, 10*10**18);
     }
     struct playTeam {
+        string title;
         address[] name;
-        string hash;
+        address owner;
+        uint[] stake;
+        uint price;
     }
     mapping(uint => playTeam) history;
-
     uint countMint = 0;
-    string connecTecs = "farewell";
 
-    function putBlock(uint _team, address[] memory _ptcp, string[] memory _hash) public
+    function putBlock(
+        uint _team, 
+        address[] memory _ptcp, 
+        uint[] memory _stake, 
+        uint _price)
+    external
     {
         uint8 iterA = 0;
         while(iterA != _ptcp.length)
         {
-            //history[_team].name[iterA] = _ptcp[iterA];
             history[_team].name.push(_ptcp[iterA]);
-            history[_team].hash = _hash[0];
-            _mint(_ptcp[iterA], 1*10**18);
+            history[_team].stake.push(_stake[iterA]);
+            ++iterA;
+        }
+        history[_team].price = _price;
+    }
+    function minting(uint _team, address[] memory _ptcp)
+    internal
+    {//_stake = at 0.001
+        uint8 iterA = 0;
+        while(iterA != _ptcp.length)
+        {
+            _mint(_ptcp[iterA], 1*10**15*history[_team].stake[iterA]);
             ++iterA;
             ++countMint;
         }
     }
-    function getname(uint _teamId) public view returns(address[] memory){
-        return history[_teamId].name;
+    function purchase(
+        uint _team, 
+        address _buyer, 
+        address[] memory _ptcp)
+    external
+    {
+        history[_team].owner = _buyer;
+        minting(_team, _ptcp);
     }
-    function gethash(uint _teamId) public view returns(string memory){
-        return history[_teamId].hash;
+    function getPtcp(uint _team) public view returns(address[] memory){
+        return history[_team].name;
     }
-    function connection() public view returns(string memory){
-        return connecTecs;
+    function getStake(uint _team) public view returns(uint[] memory){
+        return history[_team].stake;
+    }
+    function getOwner(uint _team) public view returns(address){
+        return history[_team].owner;
+    }
+    function getPrice(uint _team) public view returns(uint){
+        return history[_team].price;
     }
 }
 

@@ -1,5 +1,6 @@
 import express from "express";
 import sequelize from "sequelize";
+import filestream from "fs";
 import cors from "cors";
 import { Teams, Players, TeamPlayers, Holds } from "./models.js";
 
@@ -29,9 +30,9 @@ app.get("/ideaPoint/:teamid", async(req, res) => {
   }
   res.json(ideaPoint);
 });
-app.get("/alert/:origin", async(req, res) => {
+app.get("/alert/:title", async(req, res) => {
   const hold = await Holds.findOne({
-    where: { origin: req.params.origin },
+    where: { title: req.params.title },
   });
   if(hold == null){
       console.log('not found..');
@@ -49,8 +50,8 @@ app.get("/teamplayers/:teamid", async(req, res) => {
       where: {teamId : req.params.teamid},
   });
   await Teams.findByPk(findUsers[0].teamId).then(hash => {
-    //console.log('o ', getOrigin.origin);
-    addr.push(hash.origin);
+    //console.log('o ', hash);
+    addr.push(hash.ideaToken);//hash.title <- is team title
   });
   let iter = 0;
   while(iter != counter){
@@ -58,6 +59,7 @@ app.get("/teamplayers/:teamid", async(req, res) => {
       //console.log('tm ', user.sub);
       addr.push(user.sub);
     });
+    addr.push(findUsers[iter].status);
     console.log('u: ', findUsers[iter].playerId);
     ++iter;
   }
@@ -83,6 +85,7 @@ app.get("/teamsview", async (req, res) => {
   const offset = +req.query.offset || 0;
   const ideas = await Teams.findAndCountAll({
     order: [[sequelize.literal("id"), "DESC"]],
+    where: {display: true},
     limit,
     offset,
   });
@@ -126,12 +129,63 @@ app.get("/teamsuser/:ideaid", async (req, res) => {
   console.log('v: ', ideas);
   res.json(ideas);
 });
-app.put("/joinidea", async(req, res) => {
+app.put("/blockset", async(req, res) => {
+  await Teams.findByPk(req.body.teamId).then(team => {
+    team.blocked = req.body.blocked;
+    team.display = req.body.display;
+    team.save();
+    console.log('blockset');
+  })
+});
+app.put("/blockexit", async(req, res) => {
+  await Teams.findByPk(req.body.teamId).then(team => {
+    team.blocked = req.body.blocked;
+    team.ideaToken = req.body.price;
+    team.save();
+    console.log('o---------blcoexit');
+  })
+});
+app.put("/tokenudt", async(req, res) => {
+  const player = await Players.findOne({
+    where: { sub: req.body.useraddr }
+  })
+  // console.log('v: ',player.token);
+  // console.log('e: ',parseInt(req.body.token));
+  // console.log('r: ', player.token + parseInt(req.body.token));
+  if(player != null){
+    if(req.body.mode == 'min'){
+      player.token -= parseInt(req.body.token);
+    }
+    else{
+      player.token += parseInt(req.body.token);
+    }
+    await player.save();
+  }
+});
+app.put("/fundidea", async(req, res) => {
   const team = await Teams.findOne({
-    where: { origin: req.body.origin },
+    where: { title: req.body.name },
   });
   if(team != null){
-    team.hash = req.body.hash;
+    team.ideaToken += 1;
+    await team.save();
+  }
+  const player = await Players.findOne({
+    where: { id: req.body.userid }
+  });
+  await player.addTeams(team, { through: { status: req.body.stake }});
+  
+  const result = await Players.findOne({
+    where: { sub: req.body.userid },
+    include: Teams,
+  });
+  console.log('av: ', req.body.userid);
+});
+app.put("/joinidea", async(req, res) => {
+  const team = await Teams.findOne({
+    where: { title: req.body.name },
+  });
+  if(team != null){
     team.description = req.body.desc;
     team.ideaToken += 1;
     await team.save();
@@ -152,44 +206,92 @@ app.put("/joinidea", async(req, res) => {
   console.log('av: ', req.body.userid);
   console.log(result);
 });
+// app.post("/uploadfile", async(req, res) => {
+//   const idxContents = `{"title":"${req.body.name}","description":"${req.body.desc}"}`;
+//   filestream.writeFile(
+//     `idxFileSys/${req.body.name}.json`, idxContents, (err) => {
+//     if (err) { 
+//       throw err;
+//     }
+//     console.log('jsonが作成されました');
+//   })
+// });
+const uploadfile = async(_req) => {
+  const idxContents = `{"title":"${_req.body.name}","description":"${_req.body.desc}"}`;
+  filestream.writeFile(
+    `idxFileSys/${_req.body.name}.json`, idxContents, (err) => {
+    if (err) { 
+      throw err;
+    }
+    console.log('jsonが作成されました');
+  })
+}
+// app.post("/uploadocu", async(req, res) => {
+//   const data = Buffer.from(req.body.fbolb);
+//   console.log(data);
+//   console.log('t :', typeof data);
+//   filestream.writeFile(
+//     `dcuFileSys/${req.body.name}.docx`, data, (err) => {
+//     if (err) { 
+//       throw err;
+//     }
+//     console.log('wordが作成されました');
+//   })
+// });
+const uploadocu = async(_req) => {
+  const data = Buffer.from(_req.body.fbolb);
+  console.log(data);
+  console.log('t :', typeof data);
+  filestream.writeFile(
+    `dcuFileSys/${_req.body.name}.docx`, data, (err) => {
+    if (err) { 
+      throw err;
+    }
+    console.log('wordが作成されました');
+  })
+}
 app.post("/requirejoin", async(req, res) => {
   const reqTeam = {
-  hash : req.body.hash,
   title : req.body.name,
   description : req.body.desc,
-  origin: req.body.origin,
   reqstake: req.body.putstake,
   userId : req.body.userid,
-}
-const [player, pcreated] = await Players.findOrCreate({
-  where: { sub: req.body.useraddr },
-  defaults: {
-    nickname: req.body.username,
-    token: 0,
-  },
-});
-if (!pcreated) {
-  player.nickname = req.body.username;
-  await player.save();
-}
-
-const [team, created] = await Holds.findOrCreate({
-    where: { hash: req.body.hash },
-    defaults: reqTeam,
-});
-if (created) {
-    console.log('o---------crted');
-}
+  }
+  console.log('test: ====================', reqTeam);
+  await Players.findOrCreate({
+    where: { sub: req.body.useraddr },
+    defaults: {
+      nickname: 'auto-gen',
+      token: 0,
+    },
+  }).then(([player, created]) => {
+    if(created){
+      console.log('o--------------create');
+      player.save();
+    }
+    else{
+      console.log('x==============create');
+    }
+  });
+  const [team, created] = await Holds.findOrCreate({
+      where: { title: req.body.name },
+      defaults: reqTeam,
+  });
+  if (created) {
+      console.log('o---------crted');
+  }
 });
 app.post("/ideacreate", async(req, res) => {
-  //console.log('sv', req.body.useraddr);
+  console.log('k------------------', req.body.price);
+  
   const [team, created] = await Teams.findOrCreate({
-    where: { hash: req.body.hash },
+    where: { title: req.body.name },
     defaults: {
       title: req.body.name,
       description: req.body.desc,
-      origin: req.body.hash,
-      ideaToken: 0,
+      ideaToken: req.body.price,
+      cycle: req.body.cycle,
+      display: req.body.display,
       blocked: false,
     },
   });
@@ -202,12 +304,12 @@ app.post("/ideacreate", async(req, res) => {
   const [player, pcreated] = await Players.findOrCreate({
     where: { sub: req.body.useraddr },
     defaults: {
-      nickname: req.body.username,
+      nickname: 'N/A',
       token: 0,
     },
   });
   if (!pcreated) {
-    player.nickname = req.body.username;
+    player.nickname = 'NA';
     await player.save();
   }
 
@@ -216,6 +318,8 @@ app.post("/ideacreate", async(req, res) => {
     where: { sub: req.body.useraddr },
     include: Teams,
   });
+  //uploadocu(req);
+  //uploadfile(req);
   console.log(result);
 });
 app.post("/regiplayer", async(req, res) => {
@@ -228,6 +332,12 @@ app.post("/regiplayer", async(req, res) => {
 app.delete("/dlthold/:holdId", async(req, res) => {
   await Holds.destroy({
     where: {id: req.params.holdId}
+  })
+  console.log('o------destroyed')
+});
+app.delete("/dltteam/:teamId", async(req, res) => {
+  await Teams.destroy({
+    where: {id: req.params.teamId}
   })
   console.log('o------destroyed')
 });

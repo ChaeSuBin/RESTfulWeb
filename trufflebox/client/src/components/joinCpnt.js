@@ -29,11 +29,10 @@ class JoinModal extends React.Component {
   }
   
   joinIdea = async() => {
+    //console.log(this.props.content);
     const record = {
-      hash: this.props.content.hash,
       name: this.props.content.title,
       desc: this.props.content.description,
-      origin: this.props.content.origin,
       stake: this.props.content.reqstake,
       userid: this.props.content.userId,
     }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { getIdeaPlayers, getPlayers, getIdeaPoints } from "../api.js";
+import { getIdeaPlayers, getPlayers, getIdeaPoints, 
+putExitBlock } from "../api.js";
 import './modal.css';
 
 // 子コンポーネント（モーダル）
@@ -7,6 +8,8 @@ class ExitCall extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      showResult: false,
+      price: null,
       editors: [],
       points: [],
       score: 0,
@@ -59,8 +62,24 @@ class ExitCall extends React.Component {
     //console.log(this.state.editors);
   }
   
-  joinIdea = () => {
-    console.log('close');
+  BlockIdea = async() => {
+    this.setState({showResult: true});
+    if(this.state.price){
+      const record = {
+        teamId: this.props.content.id,
+        blocked: true,
+        price: this.state.price
+      }
+      await putExitBlock(record);
+      //console.log(this.props.content);
+    }
+    else{
+      console.log('null');
+    }
+  }
+  updateInput = (_evt) => {
+    console.log(_evt.target.value)
+    this.setState({price: _evt.target.value,});
   }
   
   render(){
@@ -78,7 +97,9 @@ class ExitCall extends React.Component {
                   </li>
                 ))}
               </ul>
-              <button onClick={this.props.onClick}>Block</button>
+              <button onClick={this.BlockIdea}>Block</button>
+              { this.state.showResult ? <input name="price" className="input" 
+                onChange={this.updateInput}/> : null }
               <button onClick={this.props.onClick}>Close</button>
               <button onClick={this.props.onClick}>Download</button>
             </div>

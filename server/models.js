@@ -31,19 +31,11 @@ export const Players = sequelize.define("players", {
 export const Teams = sequelize.define(
   "teams",
   {
-    hash: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     description: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    origin: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -54,7 +46,15 @@ export const Teams = sequelize.define(
     blocked: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-    }
+    },
+    cycle: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
+    display: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
   },
   { underscored: true },
 );
@@ -69,19 +69,11 @@ export const TeamPlayers = sequelize.define(
 
 export const Holds = sequelize.define("holds",
   {
-    hash: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     description: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    origin: {
       type: DataTypes.STRING,
       allowNull: false,
     },

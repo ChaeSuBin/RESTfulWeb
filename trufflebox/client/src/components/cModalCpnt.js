@@ -1,10 +1,13 @@
 import React from 'react';
-import { getIdeaPlayers, getPlayers, getIdeaPoints } from "../api.js";
+import { 
+  getIdeaPlayers, getPlayers, 
+  getIdeaPoints, putUpdateTokn, 
+  dltTeam, getPlayersId, putFundIdea,  } from "../api.js";
 import { Link } from "react-router-dom";
 import './modal.css';
 
 // 子コンポーネント（モーダル）
-class Modal extends React.Component {
+export class Modal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -35,8 +38,9 @@ class Modal extends React.Component {
       await getIdeaPoints(ideaid).then((data) => {
         let copyPoint = [...this.state.points];
         let tempScore = 0;
+        //copyPoint.push(100);
         for(let iter = 0; iter < data.length; ++iter){
-          //console.log(data[iter]);
+          console.log(data[iter]);
           copyPoint.push(data[iter]);
           this.setState({points: copyPoint});
           tempScore += data[iter];
@@ -58,11 +62,7 @@ class Modal extends React.Component {
     const p = await getPlayers(_playerId);
     _copyEditors.push(p.sub);
     this.setState({editors: _copyEditors});
-    //console.log(this.state.editors);
-  }
-  
-  joinIdea = () => {
-    console.log('close');
+    //console.log('e: ',this.state.editors);
   }
   
   render(){
@@ -80,16 +80,13 @@ class Modal extends React.Component {
                   </li>
                 ))}
               </ul>
-              <button onClick={this.props.onClick}>Close</button>
-              <button onClick={this.props.onClick}>Download</button>
-              <Link to={{
-                pathname: '/joinup',
-                search: `title=${this.props.content.title}`,
-                hash: `origin=${this.props.content.origin}`,
-                state: {key: 'valuee'}
-              }}>
-                <button onClick={this.joinIdea}>Join</button>
-              </Link>
+                <IdeaStatus
+                  content={this.props.content}
+                  onClick={this.props.onClick}
+                  ptcps={this.state.editors}
+                  contract={this.props.contract}
+                  account={this.props.account}
+                />
             </div>
           </div>
         </div>
@@ -101,4 +98,132 @@ class Modal extends React.Component {
   }
 }
 
-export default Modal;
+class IdeaStatus extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: null,
+      userInput: 100000,
+      showresult: false,
+      account: this.props.account,
+      contract: this.props.contract
+    };
+    //this.handleFormSubmit = this.handleFormSubmit.bind(this);
+  }
+
+  componentDidMount = async() => {
+    const price = await this.state.contract.methods.getPrice(
+      this.props.content.id).call();
+    console.log('v :', price);
+    this.setState({value: price});
+  }
+
+  createRecord = async() => {
+    const record = {
+      useraddr: this.state.account,
+      token: this.state.value,
+      mode: 'min'
+    }
+    await putUpdateTokn(record);
+  }
+  
+  Purchase = async() => {
+    //console.log('e: ', this.props.ptcps);
+    this.createRecord()
+    await this.state.contract.methods.purchase(
+      this.props.content.id,
+      this.state.account,
+      this.props.ptcps
+    ).send({ from: this.state.account });
+  }
+
+  ideaFunding = async() => {
+    this.setState({showresult: true});
+    
+    const userinfo = await getPlayersId(this.state.account);
+    
+    if(userinfo.token > this.state.userInput){
+      const record = {
+        useraddr: this.state.account,
+        token: this.state.userInput,
+        mode: 'min'
+      }
+      await putUpdateTokn(record);
+      this.excuteFunding(this.state.userInput, userinfo.id);
+      console.log(this.props.content);
+    }
+    else{
+      console.log('not enougth');
+    }
+  }
+
+  excuteFunding = async(_stake, _userId) => {
+    //console.log('k ', _stake,'u ', _userId);
+    const record = {
+      name: this.props.content.title,
+      stake: _stake,
+      userid: _userId
+    }
+    await putFundIdea(record);
+  }
+
+  updateInput = (_evt) => {
+    console.log(_evt.target.value,)
+    this.setState({userInput: _evt.target.value,});
+  }
+
+  ideaStatus = () => {
+    const mode = this.branch();
+    if(mode === true){
+      return(<>
+        <button onClick={this.props.onClick}>Close</button>
+        <button onClick={this.props.onClick}>Download</button>
+        <button onClick={this.Purchase}>Purchase</button>
+        <p style={{margin: 0, fontSize: "15px"}}>status: progress</p>
+        <p style={{margin: 0}}>value: {this.state.value}</p>
+      </>)
+    }
+    else{
+      return(<>
+        <button onClick={this.props.onClick}>Close</button>
+        <button onClick={this.props.onClick}>Download</button>
+        <Link to={{
+          pathname: '/joinup',
+          search: `title=${this.props.content.title}`,
+          hash: `origin=${this.props.content.origin}`,
+          state: {key: 'valuee'}
+        }}>
+        <button onClick={this.joinIdea}>Join</button>
+        </Link>
+        <button onClick={this.ideaFunding}>Fund</button>
+        { this.state.showresult ? <input name="amount" className="input" 
+        onChange={this.updateInput}/> : null }
+        <p style={{margin: 0, fontSize: "15px"}}>status: cycle</p>
+      </>)
+    }
+  }
+
+  branch = () => {
+    //true = progress, false = cycle
+    if(this.props.content.cycle === this.props.content.blocked){
+      return true;
+    }
+    else if(this.props.content.cycle === false){
+      return true; 
+    }
+    else{
+      return false;
+    }
+  }
+  btn_d32 = async() => {
+    await dltTeam(1);
+  }
+  render(){
+    return(
+      <div>
+        <this.ideaStatus></this.ideaStatus>
+        {/* <button onClick={this.btn_d32}>btn_d32</button> */}
+      </div>
+    )
+  }
+}

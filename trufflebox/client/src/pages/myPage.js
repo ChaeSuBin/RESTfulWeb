@@ -5,7 +5,9 @@ import ListItemsCompnt from '../components/ItemsCpnt';
 import JoinModal from '../components/joinCpnt';
 import ExitCall from '../components/mExitCpnt';
 import { registChecker } from '../components/registCatch';
-import { getTeams, getIdeaOne, getHold } from '../api.js';
+import { getTeams, getIdeaOne, getHold, putUpdateTokn,
+  getPlayersId , getPlayers
+} from '../api.js';
 
 export class UserOpt extends React.Component {
   
@@ -49,7 +51,7 @@ export class UserOpt extends React.Component {
     });
     this.setState({itemList: _copyList});
     //console.log(this.state.itemList);
-    await getHold(this.state.itemList[_iterNum].origin).then((data) => {
+    await getHold(this.state.itemList[_iterNum].title).then((data) => {
       _copyAlert.push(data);
     });
     this.setState({alertList: _copyAlert});
@@ -106,10 +108,74 @@ export class UserOpt extends React.Component {
           />
         ))}
         <JoinModal
-            account={'this.state.accounts'} showFlag={this.state.showModal}
-            content = {this.state.cont}
-            onClick={()=>{this.modalClose()}}
-          />
+          account={'this.state.accounts'} showFlag={this.state.showModal}
+          content = {this.state.cont}
+          onClick={()=>{this.modalClose()}}
+        />
+        <PurchasePoint
+          account={this.state.accounts[0]} contract={this.state.contract}
+        />
+      </div>
+    )
+  }
+}
+class PurchasePoint extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      mytoken: 0,
+      amount: 0,
+      account: this.props.account,
+      contract: this.props.contract
+    };
+    //this.handleFormSubmit = this.handleFormSubmit.bind(this);
+  }
+
+  componentDidMount = async() => {
+    const playerId = await getPlayersId(this.state.account);
+    //console.log('l: ', playerId.token);
+    this.setState({mytoken: playerId.token});
+  }
+
+  createRecord = async() => {
+    const record = {
+      useraddr: this.state.account,
+      token: this.state.amount
+    }
+    await putUpdateTokn(record);
+  }
+
+  handleFormSubmit = async(evt) => {
+    const price = this.state.amount * 10**16;
+    const BN = price.toString();
+    alert('was submitted: ' + price);
+    await this.state.contract.methods.changePoint(this.state.amount, BN).send(
+      { from: this.state.account,
+        gas: 3000000,
+        value: price
+       });
+    evt.preventDefault();
+    this.createRecord();
+  }
+  handleOnChange = (evt) => {
+    this.setState({amount: evt.target.value});
+  }
+  handleTempButton = async() => {
+    //const response = await this.state.contract.methods.userPoint().call();
+    const response = await this.state.contract.methods.tempView().call();
+    console.log(response);
+  }
+
+  render(){
+    return(
+      <div>
+        <p>-----purchase func-----</p>
+        <input name="name" className="input" placeholder='token amount' 
+              value={this.state.item} onChange={this.handleOnChange}/>
+        <button onClick={this.handleFormSubmit} className="btn-trx">
+          purchase</button>
+        <button onClick={this.handleTempButton}>log</button>
+        <p>possession: {this.state.mytoken}</p>
       </div>
     )
   }
