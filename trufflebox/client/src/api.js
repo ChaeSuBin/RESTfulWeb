@@ -16,11 +16,14 @@ export async function getHold(_origin) {
 export async function getTeamsCount() {
     return request(`/teamscount`);
 }
-export async function getIdeas() {
-    return request(`/teamsview`);
+export async function getIdeas(_nftmode) {
+    return request(`/teamsview/${_nftmode}`);
 }
 export async function getIdeaPlayers(_ideaId) {
     return request(`/teamsuser/${_ideaId}`);
+}
+export async function getPicPlayers(_picId) {
+    return request(`/playpiece/${_picId}`);
 }
 export async function getIdeaOne(_teamId) {
     return request(`/oneidea/${_teamId}`);
@@ -96,6 +99,14 @@ export async function putFundIdea(record) {
 export async function postHoldIdea(record) {
     console.log('v', JSON.stringify(record));
     return request(`/requirejoin`, {
+      body: JSON.stringify(record),
+      headers: {"Content-Type": "application/json"},
+      method: "POST",
+    });
+}
+export async function postCreateNft(record) {
+    console.log('v', JSON.stringify(record));
+    return request(`/nftcreate`, {
       body: JSON.stringify(record),
       headers: {"Content-Type": "application/json"},
       method: "POST",

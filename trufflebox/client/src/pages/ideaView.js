@@ -4,8 +4,9 @@ import React from 'react';
 import { getTeamsCount, getIdeas } from '../api.js';
 import ListItems from '../components/ItemsCpnt';
 import { Modal } from'../components/cModalCpnt';
+import { NtModal } from '../components/ntModal';
 
-class ViewItems extends React.Component {
+export class ViewItems extends React.Component {
   
   constructor(props) {
     super(props);
@@ -14,6 +15,7 @@ class ViewItems extends React.Component {
       itemList: [],
       item: null,
       cont: null,
+      nftmode: false,
       accounts: this.props.accounts,
       contract: this.props.contract
     };
@@ -21,13 +23,17 @@ class ViewItems extends React.Component {
   }
   
   componentDidMount = async () => {
+    //console.log(this.props.match.params.mode);
+    if(this.props.match.params.mode === 'nft'){
+      this.setState({nftmode: true});
+    }
     this.setState({
-      itemList: await getIdeas()
+      itemList: await getIdeas(this.props.match.params.mode)
     });
   }
 
   handleClick = (_searchItems) => {
-    console.log('v ', _searchItems);
+    //console.log('v ', _searchItems);
     this.setState({cont: _searchItems});
     this.setState({showModal: true});
   }
@@ -51,14 +57,17 @@ class ViewItems extends React.Component {
               onClick={() => this.handleClick(searchItems)}
             />
           ))}
-          <Modal
+          { this.state.nftmode ? <NtModal
             account={this.state.accounts[0]} contract={this.state.contract}
             showFlag={this.state.showModal} content = {this.state.cont}
-            onClick={()=>{this.modalClose()}}
-          />
+            onClick={()=>{this.modalClose()}} 
+            /> : <Modal
+            account={this.state.accounts[0]} contract={this.state.contract}
+            showFlag={this.state.showModal} content = {this.state.cont}
+            onClick={()=>{this.modalClose()}} />
+          }
         </header>
       </div>
     )
   }
 }
-export default ViewItems;

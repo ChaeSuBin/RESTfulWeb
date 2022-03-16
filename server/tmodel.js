@@ -1,4 +1,4 @@
-import { sequelize, Players, Teams, TeamPlayers, Holds } from "./models.js";
+import { sequelize, Players, Teams, TeamPlayers, Piece, Holds } from "./models.js";
 
 await sequelize.sync({ force: true }); //all table initilizing
 

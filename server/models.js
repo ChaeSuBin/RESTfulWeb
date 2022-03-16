@@ -66,6 +66,11 @@ export const TeamPlayers = sequelize.define(
   },
   { timestamps: false }
 );
+export const PlayersPiece = sequelize.define(
+  'piece_play',
+  {},
+  { timestamps: false }
+);
 
 export const Holds = sequelize.define("holds",
   {
@@ -89,5 +94,31 @@ export const Holds = sequelize.define("holds",
   { underscored: true },
 );
 
+export const Piece = sequelize.define(
+  "piece",
+  {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    price: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    limit: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    }
+  },
+  { underscored: true },
+);
+
 Players.belongsToMany(Teams, { through: TeamPlayers });
 Teams.belongsToMany(Players, { through: TeamPlayers });
+
+Players.belongsToMany(Piece, { through: PlayersPiece });
+Piece.belongsToMany(Players, { through: PlayersPiece });

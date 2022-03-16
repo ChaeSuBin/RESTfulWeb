@@ -2,11 +2,14 @@ import express from "express";
 import sequelize from "sequelize";
 import filestream from "fs";
 import cors from "cors";
-import { Teams, Players, TeamPlayers, Holds } from "./models.js";
+import { Teams, Players, TeamPlayers, 
+  Holds, Piece, PlayersPiece } from "./models.js";
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+//app.use(express.json());
+app.use(express.json({limit: '30mb'})); // jsonをパースする際のlimitを設定
+//app.use(express.urlencoded({limit: '30mb', extended: true}));// urlencodeされたボディをパースする際のlimitを設定
 
 const port = process.env.PORT || 3039;
 app.listen(port, () => {
@@ -80,17 +83,41 @@ app.get("/oneidea/:teamid", async (req, res) => {
   });
   res.json(idea);
 });
-app.get("/teamsview", async (req, res) => {
+app.get("/teamsview/:nftmode", async (req, res) => {
+  const nftmode = req.params.nftmode;
+
   const limit = +req.query.limit || 5;
   const offset = +req.query.offset || 0;
-  const ideas = await Teams.findAndCountAll({
-    order: [[sequelize.literal("id"), "DESC"]],
-    where: {display: true},
-    limit,
-    offset,
-  });
-  res.json(ideas.rows);
+  if(nftmode === 'idea'){
+    const ideas = await Teams.findAndCountAll({
+      order: [[sequelize.literal("id"), "DESC"]],
+      where: {display: true},
+      limit,
+      offset,
+    });
+    res.json(ideas.rows);
+  }
+  else{
+    const ideas = await Piece.findAndCountAll({
+      order: [[sequelize.literal("id"), "DESC"]],
+      limit,
+      offset,
+    });
+    res.json(ideas.rows);
+  }
 });
+app.get("/playpiece/:picid", async(req, res) => {
+  await PlayersPiece.findOne({
+    where: { pieceId: req.params.picid}
+  }).then(user => {
+    Players.findOne({
+      where: { id: user.playerId }
+    }).then(player => {
+      res.json(player.sub);
+    })
+    //console.log('v: ', user.playerId);
+  })
+})
 app.get("/playteams/:playerid", async (req, res) => {
   let items = [];
   const tid = await TeamPlayers.findAll({
@@ -238,17 +265,28 @@ const uploadfile = async(_req) => {
 //     console.log('wordが作成されました');
 //   })
 // });
-const uploadocu = async(_req) => {
+const uploadocu = async(_req, nftmode) => {
   const data = Buffer.from(_req.body.fbolb);
   console.log(data);
   console.log('t :', typeof data);
-  filestream.writeFile(
-    `dcuFileSys/${_req.body.name}.docx`, data, (err) => {
-    if (err) { 
-      throw err;
-    }
-    console.log('wordが作成されました');
-  })
+  if(nftmode){
+    filestream.writeFile(
+      `dcuFileSys/${_req.body.name}.jpg`, data, (err) => {
+      if (err) { 
+        throw err;
+      }
+      console.log('jpgが作成されました');
+    })
+  }
+  else{
+    filestream.writeFile(
+      `dcuFileSys/${_req.body.name}.docx`, data, (err) => {
+      if (err) { 
+        throw err;
+      }
+      console.log('wordが作成されました');
+    })
+  }
 }
 app.post("/requirejoin", async(req, res) => {
   const reqTeam = {
@@ -281,8 +319,42 @@ app.post("/requirejoin", async(req, res) => {
       console.log('o---------crted');
   }
 });
+app.post("/nftcreate", async(req, res) => {
+  console.log('n---------------', req.body);
+  const [player, pcreated] = await Players.findOrCreate({
+    where: { sub: req.body.useraddr },
+    defaults: {
+      nickname: 'N/A',
+      token: 0,
+    },
+  });
+  if (!pcreated) {
+    player.nickname = 'NA';
+    await player.save();
+  }
+  await Piece.findOrCreate({
+    where: { title: req.body.name },
+    defaults: {
+      title: req.body.name,
+      description: req.body.desc,
+      price: req.body.price,
+      limit: req.body.limit,
+    },
+  }).then(([piece, created]) => {
+    if(created){
+      //uploadocu(req, true);
+      player.addPiece(piece, { through: {selfGranted: false}});
+      const result = Players.findOne({
+        where: { sub: req.body.useraddr },
+        include: Piece,
+      });
+      console.log(result);
+      console.log('o---------crted');
+    }
+  });
+});
 app.post("/ideacreate", async(req, res) => {
-  console.log('k------------------', req.body.price);
+  console.log('k---------------', req.body.price);
   
   const [team, created] = await Teams.findOrCreate({
     where: { title: req.body.name },
@@ -318,7 +390,7 @@ app.post("/ideacreate", async(req, res) => {
     where: { sub: req.body.useraddr },
     include: Teams,
   });
-  //uploadocu(req);
+  //uploadocu(req, false);
   //uploadfile(req);
   console.log(result);
 });

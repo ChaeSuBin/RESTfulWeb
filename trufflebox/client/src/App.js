@@ -5,9 +5,10 @@ import getWeb3 from "./getWeb3";
 import {
   BrowserRouter as Router,
   Routes,
-  Route
+  Route,
+  useParams
 } from "react-router-dom";
-import ViewItems from "./pages/ideaView";
+import { ViewItems } from "./pages/ideaView";
 import { Home } from "./pages/rootPage"
 import { Nav } from "./components/naviCpnt";
 import { AdminOpt } from "./pages/adminPage";
@@ -65,6 +66,11 @@ class App extends Component {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
+    const Wrapper = (props) => {
+      const params = useParams();
+      return <ViewItems accounts={this.state.accounts} contract={this.state.contract}
+       {...{...props, match: {params}} } />
+    }
     return (
       <div className="App">
         {/* <h2>Smart Contract Connected</h2>
@@ -78,8 +84,7 @@ class App extends Component {
                 <Routes>
                   <Route exact path='/' element={<Home 
                     accounts={this.state.accounts} contract={this.state.contract}/> }/>
-                  <Route exact path='/search' element={<ViewItems 
-                    accounts={this.state.accounts} contract={this.state.contract}/>}/>
+                  <Route exact path='/search/:mode' element={<Wrapper/>}/>
                   <Route exact path='/create/:mode' element={<UploadIead 
                     accounts={this.state.accounts} contract={this.state.contract}/>}/>
                   <Route exact path='/joinup' element={<JoinIead 
