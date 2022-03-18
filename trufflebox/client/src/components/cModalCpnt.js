@@ -70,7 +70,7 @@ export class Modal extends React.Component {
       <>
         {this.props.showFlag ? ( // showFlagがtrueだったらModalを表示する
         <div id="overlay" className='overlay'>
-          <div id="modalcontents" className="modalcontents" onClick={(event)=>{event.stopPropagation()}}>
+          <div id="modalcontents" className="modalcontents">
             <div>
               <p>{this.props.content.title}</p>
               <ul><div style={{fontSize: "15px"}}>이 아이디어에 아래의 참가자가 참가중</div>

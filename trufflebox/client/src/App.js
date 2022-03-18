@@ -69,6 +69,7 @@ class App extends Component {
     const Wrapper = (props) => {
       const params = useParams();
       return <ViewItems accounts={this.state.accounts} contract={this.state.contract}
+      web3={this.state.web3}
        {...{...props, match: {params}} } />
     }
     return (

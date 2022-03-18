@@ -25,6 +25,9 @@ export async function getIdeaPlayers(_ideaId) {
 export async function getPicPlayers(_picId) {
     return request(`/playpiece/${_picId}`);
 }
+export async function getImgBlob(_picTitle) {
+    return request(`/readimg/${_picTitle}`);
+}
 export async function getIdeaOne(_teamId) {
     return request(`/oneidea/${_teamId}`);
 }

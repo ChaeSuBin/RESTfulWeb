@@ -1,9 +1,11 @@
 import express from "express";
 import sequelize from "sequelize";
 import filestream from "fs";
+import sharp from "sharp";
 import cors from "cors";
 import { Teams, Players, TeamPlayers, 
   Holds, Piece, PlayersPiece } from "./models.js";
+import { info } from "console";
 
 const app = express();
 app.use(cors());
@@ -156,6 +158,13 @@ app.get("/teamsuser/:ideaid", async (req, res) => {
   console.log('v: ', ideas);
   res.json(ideas);
 });
+app.get("/readimg/:pictitle", async(req, res) => {
+  filestream.readFile(`dcuFileSys/${req.params.pictitle}512.jpg`, function(err, data) {
+    if (err) throw err // Fail if the file can't be read.
+    //res.header(200, {'Content-Type': 'image/jpeg'})
+    res.json(data) // Send the file data to the browser.
+  })
+})
 app.put("/blockset", async(req, res) => {
   await Teams.findByPk(req.body.teamId).then(team => {
     team.blocked = req.body.blocked;
@@ -275,6 +284,14 @@ const uploadocu = async(_req, nftmode) => {
       if (err) { 
         throw err;
       }
+      sharp(data)
+      .resize(315)
+      .toFile(`dcuFileSys/${_req.body.name}512.jpg`, (err, info) => {
+        if(err){
+          throw err
+        }
+        console.log(info);
+      })
       console.log('jpgが作成されました');
     })
   }
@@ -342,7 +359,7 @@ app.post("/nftcreate", async(req, res) => {
     },
   }).then(([piece, created]) => {
     if(created){
-      //uploadocu(req, true);
+      uploadocu(req, true);
       player.addPiece(piece, { through: {selfGranted: false}});
       const result = Players.findOne({
         where: { sub: req.body.useraddr },
