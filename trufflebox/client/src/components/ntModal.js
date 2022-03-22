@@ -1,5 +1,5 @@
 import React from 'react';
-import { getPicPlayers } from "../api.js";
+import { getPicPlayers, putUpdateTokn, getPlayersId, putNftLimit } from "../api.js";
 import { readImg } from './readImgCpnt.js';
 import './modal.css';
 
@@ -40,8 +40,7 @@ export class NtModal extends React.Component {
   }
 
   runBlockchain = async(contract) => {
-    console.log(this.props.contract);
-    //this.setState({cont: this.props.contract})
+    //console.log(this.props.contract);
     const response = await contract.methods.connectionTecs().call();
     this.setState({ checkValue: response });
   }
@@ -67,6 +66,12 @@ export class NtModal extends React.Component {
           connection: <b>{this.state.checkValue}</b>
           <div><img src={this.state.imagePreviewUrl} /></div>
           <p style={{margin: 0}}> editor: </p>{this.state.editors}
+          <NFTStatus
+            content={this.props.content}
+            onClick={this.props.onClick}
+            contract={this.props.contract}
+            account={this.props.account}
+          />
           </div>
         </div>
         ) : (
@@ -74,5 +79,72 @@ export class NtModal extends React.Component {
         )}
       </>
     );
+  }
+}
+
+class NFTStatus extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: this.props.content.price,
+      showresult: false,
+      account: this.props.account,
+      contract: this.props.contract
+    };
+    //this.handleFormSubmit = this.handleFormSubmit.bind(this);
+  }
+
+  componentDidMount = () => {
+    console.log(this.state.value);
+  }
+
+  Purchase = async() => {
+    //console.log(this.props.content);
+    const userinfo = await getPlayersId(this.state.account);
+    let temp;
+    if(userinfo.token >= this.state.value){
+      const record = {
+        useraddr: this.state.account,
+        token: this.state.value,
+        mode: 'min'
+      }
+      this.innerSync(record);
+      (async ()=> {
+        await putNftLimit({pieceId: this.props.content.id});
+      })();
+      //
+      this.excuteMint();
+    }
+    else{
+      console.log('not enougth');
+    }
+    console.log('what');
+  }
+  innerSync = async(record) => {
+    await putUpdateTokn(record);
+  }
+
+  excuteMint = async() => {
+    await this.state.contract.methods.mintItem(
+      this.state.account,
+      this.props.content.title
+    ).send({ from: this.state.account });
+  }
+
+  ideaStatus = () => {
+    return(<>
+      <button onClick={this.props.onClick}>Close</button>
+      <button onClick={this.Purchase}>Purchase</button>
+      <p style={{margin: 0, fontSize: "15px"}}>status: progress</p>
+      <p style={{margin: 0}}>value: {this.state.value}</p>
+    </>)
+  }
+  render(){
+    return(
+      <div>
+        <this.ideaStatus></this.ideaStatus>
+        {/* <button onClick={this.btn_d32}>btn_d32</button> */}
+      </div>
+    )
   }
 }

@@ -55,7 +55,7 @@ export class ViewItems extends React.Component {
   }
   runExample = async () => {
     const { accounts, contract } = this.state;
-    console.log(contract);
+    //console.log(contract);
     const response = await contract.methods.connectionTecs().call();
     this.setState({ checkValue: response });
     console.log('v: ', response);

@@ -148,7 +148,9 @@ class IdeaStatus extends React.Component{
         token: this.state.userInput,
         mode: 'min'
       }
-      await putUpdateTokn(record);
+      (async ()=> {
+        await putUpdateTokn(record);
+      })();
       this.excuteFunding(this.state.userInput, userinfo.id);
       console.log(this.props.content);
     }

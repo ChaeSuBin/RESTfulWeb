@@ -164,6 +164,13 @@ app.get("/readimg/:pictitle", async(req, res) => {
     //res.header(200, {'Content-Type': 'image/jpeg'})
     res.json(data) // Send the file data to the browser.
   })
+});
+app.put("/nftlimit", async(req, res) => {
+  await Piece.findByPk(req.body.pieceId).then(piece => {
+    piece.limit -= 1;
+    piece.save();
+    console.log('0----------limit');
+  })
 })
 app.put("/blockset", async(req, res) => {
   await Teams.findByPk(req.body.teamId).then(team => {

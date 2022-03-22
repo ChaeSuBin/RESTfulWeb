@@ -83,6 +83,14 @@ export async function putFundIdea(record) {
       method: "PUT",
     });
 }
+export async function putNftLimit(record) {
+    console.log('v', JSON.stringify(record));
+    return request(`/nftlimit`, {
+      body: JSON.stringify(record),
+      headers: {"Content-Type": "application/json"},
+      method: "PUT",
+    });
+}
 // export async function postFileIdx(stream) {
 //     console.log('v', JSON.stringify(stream));
 //     return request(`/uploadfile`, {

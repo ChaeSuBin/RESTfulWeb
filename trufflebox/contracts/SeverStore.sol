@@ -41,8 +41,14 @@ contract SeverStore is ERC20{
         {
             _mint(_ptcp[iterA], 1*10**15*history[_team].stake[iterA]);
             ++iterA;
-            ++countMint;
+            countMint += 1*10**15*history[_team].stake[iterA];
         }
+    }
+    function retrieve(uint _value, address _editor)
+    external
+    {
+        _mint(_editor, 1*10**15*_value);
+        countMint += 1*10**15*_value;
     }
     function purchase(
         uint _team, 
